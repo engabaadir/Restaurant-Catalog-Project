@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="row page-margin">
+
+  <h3>Are you sure you want to delete {{ delRestaurant.name }} ?</h3>
+  <form action="" method="POST">
+    <button type="submit" class="btn btn-danger">Delete</button>
+  </form>
+</div>
+{% endblock content %}

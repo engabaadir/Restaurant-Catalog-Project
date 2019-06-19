@@ -1,0 +1,161 @@
+<html>
+
+<head>
+    <link href="../static/content/bootstrap.min.css" rel="stylesheet" />
+    <!--LOAD PRE-REQUISITES FOR GOOGLE SIGN IN -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
+    </script>
+
+    <script src="https://apis.google.com/js/platform.js?onload=start"></script>
+    <!--meta name="google-signin-client_id" content="13140951618-15nik769cellkubaqnjk5facdib2dh4d.apps.googleusercontent.com"-->
+
+    <script>
+        gapi.load('auth2', function () {
+            auth2 = gapi.auth2.init({
+                client_id: '496590283289-0hejpvo6h2ugvuegvi8qg1r80equbml9.apps.googleusercontent.com',
+                // Scopes to request in addition to 'profile' and 'email'
+                //scope: 'additional_scope'
+            });
+        });
+    </script>
+
+
+    <!-- END PRE-REQUISITES FOR GOOGLE SIGN IN -->
+
+
+</head>
+
+
+<body>
+
+
+
+    <div class="col-md-4 col-md-offset-4" style="padding-top:70px">
+        <form>
+            <fieldset>
+                <legend>Login Information:</legend>
+
+                <div class="row">
+                    <div class="col-xs-12">
+                        <label>Email:</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <input type="email" name="email" class="form-control" placeholder="Enter email here" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <label>Password:</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <input type="password" name="password" class="form-control" required="required" placeholder="Enter user password here" />
+                    </div>
+                </div>
+                <hr />
+                <div class="row">
+                    <div class="col-xs-3">
+                        <input type="button" name="login" value="Login" class="btn btn-primary btn-block" />
+                    </div>
+                    <div class="col-xs-4">
+                        <input type="button" id="signinButton" name="google-login" value="Sign with google" class="btn btn-primary btn-block" />
+                    </div>
+                </div>
+
+
+            </fieldset>
+        </form>
+        <div class="row">
+            &nbsp;
+        </div>
+        <div id="sign_up">&nbsp;Need to sign up? <a href="#"> <span><strong>click here</strong></span></a></div>
+        <div id="print_error" style="display:none"></div>
+    </div>
+
+    <!--<button class="g-signin2" id="signinButton">Sign in with Google</button>-->
+    <!-- Add where you want your sign-in button to render -->
+    <!-- Use an image that follows the branding guidelines in a real app -->
+
+    <script>
+        $('#signinButton').click(function () {
+            auth2.grantOfflineAccess({ 'redirect_uri': 'postmessage' }).then(signInCallback);
+        });
+    </script>
+    </div>
+
+    <!--END NEW GOOGLE BUTTON -->
+    <!--NEW GOOGLE SIGN IN CODE -->
+    <script>
+        function signInCallback(json) {
+            console.log('inside callback fuction');
+            console.log(json);
+            // authResult = JSON.parse(json);
+            authResult = json;
+            if (authResult['code']) {
+                // Hide the sign-in button now that the user is authorized, for example:
+                $('#signinButton').attr('style', 'display: none');
+                $('#result').html('One-Time Auth Code:</br>' + authResult['code'] + '')
+                // Send the code to the server
+                $.ajax({
+                    type: 'POST',
+                    url: '/oauth/google',
+                    processData: false,
+                    data: authResult['code'],
+                    contentType: 'application/octet-stream; charset=utf-8',
+                    success: function (result) {
+                        // Handle or verify the server response if necessary.
+                        if (result) {
+                            window.location.href = "/restaurants";
+                            console.log('Login Successful!</br>' + result + '')
+                        } else if (authResult['error']) {
+                            $('#print_error').text('There was an error: ' + authResult['error']);
+                            console.log('There was an error: ' + authResult['error']);
+                        } else {
+                            $('#print_error').text('There was an error: ' + authResult['error']);
+                            console.log('Failed to make a server-side call. Check your configuration and console.');
+                        }
+                        $('#sign_up').hide();
+                        $('#print_error').show();
+                    }
+                });
+            }
+        }
+    </script>
+
+
+    <!--a href='#' onclick="signOut();">Sign Out from Google <a/>
+    <!--script>
+        var auth2;
+
+        gapi.load('auth2', function() {
+            auth2 = gapi.auth2.init();
+        });
+
+        function onSignIn() {
+            var profile = auth2.currentUser.get().getBasicProfile();
+            console.log('User logged in.');
+            console.log('ID:', profile.getId());
+            console.log('Name:', profile.getName());
+            console.log('Image URL:', profile.getImageUrl());
+            console.log('Email:', profile.getEmail());
+        } -->
+    <!--script>
+        function signOut() {
+            auth2.signOut().then(function() {
+                console.log('User signed out.');
+            });
+        }
+        </script>
+
+
+    <!--END GOOGLE SIGN IN CODE -->
+
+
+
+
+
+
+</body>

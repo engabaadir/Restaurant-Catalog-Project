@@ -1,0 +1,104 @@
+body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+
+/* styles for validation helpers */
+.field-validation-error {
+    color: #b94a48;
+}
+
+.field-validation-valid {
+    display: none;
+}
+
+input.input-validation-error {
+    border: 1px solid #b94a48;
+}
+
+input[type="checkbox"].input-validation-error {
+    border: 0 none;
+}
+
+.validation-summary-errors {
+    color: #b94a48;
+}
+
+.validation-summary-valid {
+    display: none;
+}
+.content-color
+{
+    border-radius: 3px;
+    margin-top: 30px;
+    background: #eeeded;
+}
+
+.list-item {
+    position: relative;
+    display: block;
+    padding: 10px 15px;
+    margin-bottom: -1px;
+    /* background-color: #fff; */
+    /* border: 1px solid #ddd; */
+}
+
+.alert-fix
+{
+    /* margin-top: 30px; */
+    padding-top: 10px;
+}
+.page-header
+{
+    border-bottom: 1px solid #ffffff;
+}
+.page-margin {
+    border-radius: 3px;
+    padding: 10px 20px;
+    padding-bottom: 30px;
+    margin-bottom: 20px;
+    margin-top: 30px;
+    background: #eeeded;
+    /* min-height: 250px */
+  }
+  h3,h2{
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
+  }
+  .menu-margin {
+    border-radius: 6px;
+    margin: 10px 20px;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+    margin-top: 15px;
+    background: #dbdbdb;
+  }
+  .menu-margin:hover{
+    background: #d4d4d4;
+    
+  }
+.category-content-section {
+    /* background: #ffffff; */
+    padding: 10px 20px;
+    border-right: 1px solid #ffffff;
+    margin-bottom: 20px;
+    margin-top: 30px;
+  }
+  .content-section {
+    /* background: #ffffff; */
+    padding: 10px 20px;
+    margin-bottom: 20px;
+    margin-top: 30px;
+  }

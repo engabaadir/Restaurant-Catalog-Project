@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="row content-color">
+	<div class="col-md-4">
+		<div class="category-content-section">
+			<h3>Restaurants</h3>
+			<table class="table">
+				<thead>
+
+					{% if not session.name %}
+					<tr>
+						<td>
+
+						</td>
+					</tr>
+					{% else %}
+					<tr>
+						<th></th>
+						<th></th>
+						<th></th>
+					</tr>
+					{% endif %}
+				</thead>
+				<tbody>
+					{% for restaurant in restaurants %}
+					{% if not session.name %}
+					<tr>
+						<td><a href="{{url_for('list_all_menu', restaurant_id = restaurant.id)}}">
+								{{ restaurant.name }} </a></td>
+					</tr>
+					{% else %}
+					<tr>
+						<td><a href="{{url_for('list_all_menu', restaurant_id = restaurant.id)}}">
+								{{ restaurant.name }} </a></td>
+						<td>
+							<a href="{{url_for('editRestaurant', restaurant_id = restaurant.id)}}"><button type="submit"
+									class="btn btn-primary btn-sm">Edit</button> </a>
+							<a href="{{url_for('deleteRestaurant', restaurant_id = restaurant.id)}}"><button
+									type="submit" class="btn btn-danger btn-sm">Delete</button> </a>
+						</td>
+					</tr>
+					{% endif %}
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<div class="col-md-7">
+		<div class="content-section">
+			<h3>{{ res_name }} (<i>{{ countitem }} items </i>)</h3>
+			<ul class="list-group">
+				{% for item in items %}
+				<li class="list-item"><a href="{{url_for('view_menu', restaurant_name = item.restaurant.name, menu_name = item.name)}}"> {{ item.name }} </a></li>
+				{% endfor %}
+			</ul>
+		</div>
+	</div>
+</div>
+
+{% endblock content %}
