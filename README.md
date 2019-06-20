@@ -2,7 +2,7 @@
 This is a project for Udacity's 
 [Full Stack Web Developer Nanodegree](https://www.udacity.com/course/full-stack-web-developer-nanodegree--nd004)
 ## Project Overview
-The project provides a list of items within a variety of categories as well as provide a user registration and authentication system. Registered users will have the ability to post, edit and delete their own items.
+The project provides a list of items within a variety of categories as well as it provides a user registration and authentication system. Registered users will have the ability to post, edit and delete their own items.
 ## Why this Project?
 1. To enhance student's web development skills. 
 1. To develop a RESTful web application using the Python framework Flask. 
