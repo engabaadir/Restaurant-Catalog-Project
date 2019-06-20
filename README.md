@@ -23,7 +23,8 @@ This project runs in a virutal machine using Vagrant so to get things done, foll
 1. *models.py*
 1. *views.py* 
 
-## Program Screen Shots: 
-### 1. Home Page with no user
-    
+## Program screen shots: 
+### 1. Home page with no user
 ![Screenshot](resources/home_page_with_no_user.png)
+### 2. Home page with user
+![Screenshot](resources/home_page_with_user.png)

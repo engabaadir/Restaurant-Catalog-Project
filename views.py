@@ -217,7 +217,6 @@ def login_user():
 #Register User
 @app.route('/register-user', methods=["GET","POST"])
 def register_user():
-    # try:
       if request.method == 'POST':
         name =request.form['name']
         email = request.form['email']
@@ -241,9 +240,6 @@ def register_user():
         return redirect('/login')
       else:
         return render_template('signup.html')  
-    # except Exception as e:
-    #     flash(str(e), "danger")
-    #     print(str(e))
 
 # New restaurant registration
 @app.route('/restaurant/new/', methods=['GET', 'POST'])
