@@ -26,4 +26,4 @@ This project runs in a virutal machine using Vagrant so to get things done, foll
 ## Program Screen Shots: 
 ### 1. Home Page with no user
     
-![Screenshot](/resources/home_page_with_no_user.PNG)
+![Screenshot](resources/home_page_with_no_user.png)
