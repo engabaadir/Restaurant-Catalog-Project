@@ -30,9 +30,9 @@ This project runs in a virutal machine using Vagrant so to get things done, foll
 ![Screenshot](resources/home_page_with_user.png)
 ### 3. Add new restaurant
 ![Screenshot](resources/new_restaurant.png)
-### 3. Delete restaurant
+### 4. Delete restaurant
 ![Screenshot](resources/delete_restaurant.png)
-### 3. Add new menu
+### 5. Add new menu
 ![Screenshot](resources/new_menu.png)
-### 3. Json View
+### 6. Json View
 ![Screenshot](resources/json_file.png)
