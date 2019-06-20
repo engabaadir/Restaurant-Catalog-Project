@@ -4,7 +4,7 @@ Routes and views for the flask application.
 from models import Base, Restaurant, MenuItem, Users
 from flask import Flask, render_template, request, redirect, jsonify, url_for, flash
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, relationship, joinedload
 from sqlalchemy import create_engine
 from flask import session as login_session
 from oauth2client.client import flow_from_clientsecrets
@@ -25,7 +25,7 @@ session = DBSession()
 
 app = Flask(__name__)
 
-
+#Login using google provider
 @app.route('/oauth/<provider>', methods=['POST'])
 def login(provider):
     # STEP 1 - Parse the auth code
@@ -103,7 +103,7 @@ def login(provider):
         login_session['name'] = data['name']
         login_session['picture'] = data['picture']
         login_session['email'] = data['email']
-
+        
         print('User Name: %s' % login_session['name'])
         print('User Email: %s' % login_session['email'])
 
@@ -113,7 +113,7 @@ def login(provider):
             email=login_session['email']).first()
         if not user:
             new_user = Users(
-                name=login_session['name'], picture=login_session['picture'], email=login_session['email'], uType="2")
+                name=login_session['name'], picture=login_session['picture'], email=login_session['email'], category="2")
 
             session.add(new_user)
             session.commit()
@@ -129,6 +129,7 @@ def login(provider):
         # return jsonify({'token': token.decode('ascii'), 'duration': 600})
 
         login_session['user_id'] = user.id
+        login_session['category'] = "2"
 
         output = ''
         output += login_session['name']
@@ -142,54 +143,107 @@ def login(provider):
 
 @app.route('/logout')
 def logout():
-    access_token = login_session['access_token']
-    print('In access token is %s', access_token)
-    print('User name is: ')
-    print(login_session['name'])
-    if access_token is None:
-        print('Access Token is None')
-        response = make_response(
-            json.dumps('Current user not connected.'), 401)
-        response.headers['Content-Type'] = 'application/json'
-        return response
-    url = ('https://accounts.google.com/o/oauth2/revoke?token=%s'
-           % access_token)
-    h = httplib2.Http()
-    result = \
-        h.request(uri=url, method='POST', body=None, headers={
-                  'content-type': 'application/x-www-form-urlencoded'})[0]
+    if login_session['category'] =="2":
+        access_token = login_session['access_token']
+        if access_token is None:
+            response = make_response(
+                json.dumps('Current user not connected.'), 401)
+            response.headers['Content-Type'] = 'application/json'
+            return response
+        url = ('https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token)
+        h = httplib2.Http()
+        result = h.request(uri=url, method='POST', body=None, headers={'content-type': 'application/x-www-form-urlencoded'})[0]
 
-    print(url)
-    print('result is ')
-    print(result)
-    if result['status'] == '200':
-        del login_session['access_token']
+        if result['status'] == '200':
+            del login_session['access_token']
+            del login_session['name']
+            del login_session['email']
+            del login_session['picture']
+            del login_session['user_id']
+            del login_session['category']
+            response = make_response(json.dumps('Successfully disconnected.'), 200)
+            response.headers['Content-Type'] = 'application/json'
+            flash("Successfully signed out from google account", "success")
+            return redirect('/home')
+        else:
+            response = make_response(
+                json.dumps('Failed to revoke token for given user.'), 400)
+            response.headers['Content-Type'] = 'application/json'
+            return response
+    else:
         del login_session['name']
         del login_session['email']
-        del login_session['picture']
         del login_session['user_id']
-        response = make_response(json.dumps('Successfully disconnected.'), 200)
-        response.headers['Content-Type'] = 'application/json'
-        flash("Successfully logged out", "success")
+        del login_session['category']
+        flash("Successfully signed out", "success")
         return redirect('/home')
-        # return response
+
+#Signup page
+@app.route('/signup')
+def signup_page():
+    return redirect(url_for('register_user'))
+#Login Page
+@app.route('/login', methods=['GET', 'POST'])
+def login_user():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+
+        print('email: %s' %email)
+        print('password: %s' %password)
+
+        user = session.query(Users).filter_by(email=email).first()
+        if not user:
+           
+            print('User or Password is incorrect!')
+            flash('User or Password is incorrect!.', "danger")
+            return redirect('/login')
+        else:
+            print('User is successfully logged in!')
+            flash('User is successfully logged in!', "success")
+            login_session['name'] = user.name
+            login_session['user_id'] = user.id
+            login_session['email'] = user.email
+            login_session['category'] = user.category
+            return redirect('/home')
     else:
-        response = make_response(
-            json.dumps('Failed to revoke token for given user.'), 400)
-        response.headers['Content-Type'] = 'application/json'
-        return response
-
-
-@app.route('/login')
-def login_page():
-    """Renders the login page."""
-    return render_template(
+        return render_template(
         'signin.html',
         title='Login',
         year=datetime.now().year,
         message='The restaurant catalog'
     )
 
+#Register User
+@app.route('/register-user', methods=["GET","POST"])
+def register_user():
+    # try:
+      if request.method == 'POST':
+        name =request.form['name']
+        email = request.form['email']
+        password = request.form['password']
+
+        print('name: %s' %name)
+        print('email: %s' %email)
+        print('password: %s' %password)
+
+        user = session.query(Users).filter_by(email=email).first()
+        if not user:
+            new_user = Users(name=name, email=email, password=password, category="2")
+            session.add(new_user)
+            session.commit()
+            print('User is registered successfully!')
+            flash('User is successfully registered.', "success")
+        else:
+            print('User Exists')
+            flash('User already registered!', "success")
+        
+        return redirect('/login')
+      else:
+        return render_template('signup.html')  
+    # except Exception as e:
+    #     flash(str(e), "danger")
+    #     print(str(e))
 
 # New restaurant registration
 @app.route('/restaurant/new/', methods=['GET', 'POST'])
@@ -251,6 +305,13 @@ def deleteRestaurant(restaurant_id):
         return render_template('delete_restaurant.html',
                                delRestaurant=delRestaurant)
 
+# JSON Restaurants View
+@app.route('/json')
+def restaurantJSON():
+    
+    # return jsonify(restaurants=[r.serialize for r in restaurants])
+    restaurants = session.query(Restaurant).options(joinedload(Restaurant.items)).all()
+    return jsonify(restaurants=[dict(c.serialize, items=[i.serialize for i in c.items]) for c in restaurants])
 
 @app.route('/')
 @app.route('/home')
@@ -264,14 +325,6 @@ def list_all_restaurants():
     menus = session.query(MenuItem).all()
     return render_template('restaurants.html', restaurants=restaurants, menus=menus)
 
-# Restaurants as json
-@app.route('/json')
-def restaurantsJSON():
-    restaurants = session.query(Restaurant).options(
-        joinedload(Restaurant.items)).all()
-    return jsonify(restaurants=[dict(c.serialize, items=[i.serialize for i in c.items]) for c in restaurants])
-
-
 # List all menus
 @app.route('/restaurant/<int:restaurant_id>/')
 @app.route('/restaurant/<int:restaurant_id>/menu/')
@@ -281,19 +334,12 @@ def list_all_menu(restaurant_id):
         restaurant_id=restaurant_id).all()
     return render_template('menus.html', items=items, restaurant=restaurant)
 
-@app.route('/restaurant/<int:restaurant_id>/')
-@app.route('/restaurant/<int:restaurant_id>/menu/')
-def list_all_menu_box(restaurant_id):
-    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
-    items = session.query(MenuItem).filter_by(
-        restaurant_id=restaurant_id).all()
-    return render_template('menus.html', items=items, restaurant=restaurant)
-
-#view restaurant menu items
+# view restaurant menu items
 @app.route('/restaurant/<string:restaurant_name>/menu/')
 def view_restaurant(restaurant_name):
     restaurants = session.query(Restaurant).all()
-    restaurant = session.query(Restaurant).filter_by(name=restaurant_name).one()
+    restaurant = session.query(Restaurant).filter_by(
+        name=restaurant_name).one()
 
     items = session.query(MenuItem).filter_by(
         restaurant_id=restaurant.id).all()
@@ -310,7 +356,7 @@ def view_menu(restaurant_name, menu_name):
         name=restaurant_name).one()
     item = session.query(MenuItem).filter_by(
         name=menu_name).one()
-    return render_template('view_menu.html',item=item, restaurant=restaurant)
+    return render_template('view_menu.html', item=item, restaurant=restaurant)
 
 # Create a new menu item
 @app.route('/restaurant/<int:restaurant_id>/menu/new/', methods=['GET', 'POST'])
@@ -323,7 +369,8 @@ def add_menu(restaurant_id):
         if restaurant_id == "":
             flash('Please select a restaurant name.', "danger")
             return render_template('new_menu.html', restaurant_id=restaurant_id)
-        restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+        restaurant = session.query(
+            Restaurant).filter_by(id=restaurant_id).one()
         if restaurant.user_id != login_session['user_id']:
             flash("You don't have permission to add a menu", "danger")
             return redirect(url_for('home'))
@@ -333,7 +380,7 @@ def add_menu(restaurant_id):
                            restaurant_id=restaurant_id,
                            user_id=user_id)
         session.add(newMenu)
-        flash('New Menu %s Item Successfully Created' % (newMenu.name), "success")
+        flash('New Menu %s Item Successfully Added' %(newMenu.name), "success")
         session.commit()
         return redirect(url_for('list_all_menu', restaurant_id=restaurant_id))
     else:
@@ -363,12 +410,12 @@ def edit_menu(restaurant_id, menu_id):
             editedItem.price = request.form['price']
         session.add(editedItem)
         session.commit()
-        flash('Menu Item Successfully Edited','success')
+        flash('Menu Item Successfully Edited', 'success')
         return redirect(url_for('list_all_menu', restaurant_id=restaurant_id))
     else:
         return render_template('edit_menu.html', restaurant_id=restaurant_id, menu_id=menu_id, menuItem=editedItem)
 
-#Delete Menu
+# Delete Menu
 @app.route('/restaurant/<int:restaurant_id>/menu/<int:menu_id>/delete', methods=['GET', 'POST'])
 def delete_menu(restaurant_id, menu_id):
 
@@ -385,10 +432,11 @@ def delete_menu(restaurant_id, menu_id):
     if request.method == 'POST':
         session.delete(itemToDelete)
         session.commit()
-        flash('Menu Item Successfully Deleted','success')
+        flash('Menu Item Successfully Deleted', 'success')
         return redirect(url_for('list_all_menu', restaurant_id=restaurant_id))
     else:
         return render_template('delete_menu.html', menuItem=itemToDelete)
+
 
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'

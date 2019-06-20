@@ -5,13 +5,13 @@
   <div class="col-md-4">
     <div class="category-content-section">
       <h3>Restaurants</h3>
-      <table class="table">
+      <table class="table table-hover">
         <thead>
 
           {% if not session.name %}
           <tr>
             <td>
-              
+
             </td>
           </tr>
           {% else %}
@@ -34,8 +34,10 @@
               <a href="{{url_for('list_all_menu', restaurant_id = restaurant.id)}}"> {{ restaurant.name }} </a>
             </td>
             <td>
-              <a href="{{url_for('editRestaurant', restaurant_id = restaurant.id)}}"><button type="submit" class="btn btn-primary btn-sm">Edit</button> </a>
-              <a href="{{url_for('deleteRestaurant', restaurant_id = restaurant.id)}}"><button type="submit" class="btn btn-danger btn-sm">Delete</button> </a>
+              <a href="{{url_for('editRestaurant', restaurant_id = restaurant.id)}}"><button type="submit"
+                  class="btn btn-primary btn-sm">Edit</button> </a>
+              <a href="{{url_for('deleteRestaurant', restaurant_id = restaurant.id)}}"><button type="submit"
+                  class="btn btn-danger btn-sm">Delete</button> </a>
             </td>
           </tr>
           {% endif %}
@@ -44,13 +46,32 @@
       </table>
     </div>
   </div>
-
+  <!-- <div clas="col-md-4">
+    <div class="category-content-section">
+      {% for restaurant in restaurants %}
+      <div > 
+         
+        <a href="{{url_for('list_all_menu', restaurant_id = restaurant.id)}}"> {{ restaurant.name }} </a>
+        {% if session.name %}
+        <p>
+        <a href="{{url_for('editRestaurant', restaurant_id = restaurant.id)}}"><button type="submit"
+            class="btn btn-primary btn-sm">Edit</button> </a>
+        <a href="{{url_for('deleteRestaurant', restaurant_id = restaurant.id)}}"><button type="submit"
+            class="btn btn-danger btn-sm">Delete</button> </a>
+        </p>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div> -->
   <div class="col-md-7">
     <div class="content-section">
       <h3>Latest Menu Items</h3>
       <ul class="list-group">
         {% for menu in menus %}
-        <li class="list-item"><a href="{{url_for('view_restaurant', menu_id = menu.id, restaurant_name = menu.restaurant.name)}}"> {{ menu.name }}  </a> <i>({{ menu.restaurant.name }})</i></li>
+        <li class="list-item"><a
+            href="{{url_for('view_restaurant', menu_id = menu.id, restaurant_name = menu.restaurant.name)}}">
+            {{ menu.name }} </a> <i>({{ menu.restaurant.name }})</i></li>
         {% endfor %}
       </ul>
     </div>

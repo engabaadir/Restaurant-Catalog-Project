@@ -1,0 +1,103 @@
+<html>
+
+<head>
+    <link href="../static/content/bootstrap.min.css" rel="stylesheet" />
+    <link href="../static/content/site.css" rel="stylesheet" />
+</head>
+
+
+<body>
+
+    <div class="row login-box">
+        <div class="col-md-4 col-md-offset-4" style="padding-top:70px">
+            <!-- <div class="page-header">
+                <h3>Login Information</h3>
+            </div> -->
+            <form action="" method="POST">
+                <fieldset>
+                    <legend>Signup Information:</legend>
+                    <div class="row">
+                            <div class="col-xs-12">
+                                <label>Name:</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <input type="text" name="name" class="form-control" required="required" placeholder="Enter full name here" />
+                            </div>
+                        </div>
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <label>Email:</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <input type="email" name="email" class="form-control" required="required" placeholder="Enter email here" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <label>Password:</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <input type="password" name="password" class="form-control" required="required"
+                                placeholder="Enter password here" />
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <input type="submit" name="submit" value="Create" class="btn btn-primary btn-block" />
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+            <div class="row">
+                &nbsp;
+            </div>
+            <div id="sign_up">&nbsp;Go to Login Page? <a href="/login"> <span><strong>click here</strong></span></a></div>
+            <div id="print_error" style="display:none"></div>
+        </div>
+    </div>
+    <!--<button class="g-signin2" id="signinButton">Sign in with Google</button>-->
+    <!-- Add where you want your sign-in button to render -->
+    <!-- Use an image that follows the branding guidelines in a real app -->
+
+    
+
+    <!--a href='#' onclick="signOut();">Sign Out from Google <a/>
+    <!--script>
+        var auth2;
+
+        gapi.load('auth2', function() {
+            auth2 = gapi.auth2.init();
+        });
+
+        function onSignIn() {
+            var profile = auth2.currentUser.get().getBasicProfile();
+            console.log('User logged in.');
+            console.log('ID:', profile.getId());
+            console.log('Name:', profile.getName());
+            console.log('Image URL:', profile.getImageUrl());
+            console.log('Email:', profile.getEmail());
+        } -->
+    <!--script>
+        function signOut() {
+            auth2.signOut().then(function() {
+                console.log('User signed out.');
+            });
+        }
+        </script>
+
+
+    <!--END GOOGLE SIGN IN CODE -->
+
+
+
+
+
+
+</body>

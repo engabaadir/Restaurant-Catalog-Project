@@ -61,6 +61,21 @@ input[type="checkbox"].input-validation-error {
     /* margin-top: 30px; */
     padding-top: 10px;
 }
+.form-login-box {
+    border-radius: 3px;
+    border: 1px solid #ffffff;
+    background: #eeeded;
+    /* min-height: 250px */
+  }
+.login-box {
+    border-radius: 3px;
+    margin: 0px 0px;
+    padding-bottom: 30px;
+    margin-bottom: 20px;
+    margin-top: 30px;
+    background: #eeeded;
+    /* min-height: 250px */
+  }
 .page-header
 {
     border-bottom: 1px solid #ffffff;
@@ -79,16 +94,27 @@ input[type="checkbox"].input-validation-error {
   }
   .menu-margin {
     border-radius: 6px;
-    margin: 10px 20px;
+    /* padding: 10px 20px; */
     padding-bottom: 15px;
     margin-bottom: 15px;
     margin-top: 15px;
     background: #dbdbdb;
   }
-  .menu-margin:hover{
-    background: #d4d4d4;
-    
+  
+  .side-menu-margin {
+    border-radius: 6px;
+    margin: 10px 20px;
+    padding-bottom: 10px;
+    padding-top: 10px;
+    margin-bottom: 15px;
+    margin-top: 15px;
+    background: #e6e6e6;
   }
+  
+  .menu-margin,.side-menu-margin:hover{
+    background: #d4d4d4;
+  }
+
 .category-content-section {
     /* background: #ffffff; */
     padding: 10px 20px;

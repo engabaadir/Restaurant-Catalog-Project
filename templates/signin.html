@@ -2,6 +2,7 @@
 
 <head>
     <link href="../static/content/bootstrap.min.css" rel="stylesheet" />
+    <link href="../static/content/site.css" rel="stylesheet" />
     <!--LOAD PRE-REQUISITES FOR GOOGLE SIGN IN -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
     </script>
@@ -28,53 +29,73 @@
 
 <body>
 
-
-
-    <div class="col-md-4 col-md-offset-4" style="padding-top:70px">
-        <form>
-            <fieldset>
-                <legend>Login Information:</legend>
-
-                <div class="row">
-                    <div class="col-xs-12">
-                        <label>Email:</label>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-xs-12">
-                        <input type="email" name="email" class="form-control" placeholder="Enter email here" />
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-xs-12">
-                        <label>Password:</label>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-xs-12">
-                        <input type="password" name="password" class="form-control" required="required" placeholder="Enter user password here" />
-                    </div>
-                </div>
-                <hr />
-                <div class="row">
-                    <div class="col-xs-3">
-                        <input type="button" name="login" value="Login" class="btn btn-primary btn-block" />
-                    </div>
-                    <div class="col-xs-4">
-                        <input type="button" id="signinButton" name="google-login" value="Sign with google" class="btn btn-primary btn-block" />
-                    </div>
-                </div>
-
-
-            </fieldset>
-        </form>
-        <div class="row">
-            &nbsp;
+    <div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert-fix">
+            <div class="alert alert-{{ category }}">
+                <button type="button" class="close" data-dismiss="alert">x</button>
+                {{ message }}
+            </div>
         </div>
-        <div id="sign_up">&nbsp;Need to sign up? <a href="#"> <span><strong>click here</strong></span></a></div>
-        <div id="print_error" style="display:none"></div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
     </div>
+    <div class="row login-box">
+        <div class="col-md-4 col-md-offset-4" style="padding-top:70px">
+            <!-- <div class="page-header">
+                <h3>Login Information</h3>
+            </div> -->
+            <form action="" method="POST">
+                <fieldset>
+                    <legend>Login Information:</legend>
 
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <label>Email:</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <input type="email" name="email" class="form-control" placeholder="Enter email here"
+                                required="required" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <label>Password:</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <input type="password" name="password" class="form-control" required="required"
+                                placeholder="Enter user password here" />
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <input type="submit" name="login" value="Login" class="btn btn-primary btn-block" />
+                        </div>
+                        <div class="col-xs-4">
+                            <input type="button" id="signinButton" name="google-login" value="Sign with google"
+                                class="btn btn-primary btn-block" />
+                        </div>
+                    </div>
+
+
+                </fieldset>
+            </form>
+            <div class="row">
+                &nbsp;
+            </div>
+            <div id="sign_up">&nbsp;Need to sign up? <a href="/signup"> <span><strong>click here</strong></span></a>
+            </div>
+            <div id="print_error" style="display:none"></div>
+        </div>
+    </div>
     <!--<button class="g-signin2" id="signinButton">Sign in with Google</button>-->
     <!-- Add where you want your sign-in button to render -->
     <!-- Use an image that follows the branding guidelines in a real app -->
