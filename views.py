@@ -25,7 +25,7 @@ session = DBSession()
 
 app = Flask(__name__)
 
-#Login using google provider
+# Login using google provider
 @app.route('/oauth/<provider>', methods=['POST'])
 def login(provider):
     # STEP 1 - Parse the auth code
@@ -103,7 +103,7 @@ def login(provider):
         login_session['name'] = data['name']
         login_session['picture'] = data['picture']
         login_session['email'] = data['email']
-        
+
         print('User Name: %s' % login_session['name'])
         print('User Email: %s' % login_session['email'])
 
@@ -120,13 +120,6 @@ def login(provider):
             print('User is registered successfully!')
         else:
             print('User Exists')
-        # STEP 4 - Make token
-        #token = user.generate_auth_token(600)
-
-        # STEP 5 - Send back token to the client
-        # return jsonify({'token': token.decode('ascii')})
-
-        # return jsonify({'token': token.decode('ascii'), 'duration': 600})
 
         login_session['user_id'] = user.id
         login_session['category'] = "2"
@@ -143,16 +136,18 @@ def login(provider):
 
 @app.route('/logout')
 def logout():
-    if login_session['category'] =="2":
+    if login_session['category'] == "2":
         access_token = login_session['access_token']
         if access_token is None:
             response = make_response(
                 json.dumps('Current user not connected.'), 401)
             response.headers['Content-Type'] = 'application/json'
             return response
-        url = ('https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token)
+        url = ('https://accounts.google.com/o/oauth2/revoke?token=%s' %
+               access_token)
         h = httplib2.Http()
-        result = h.request(uri=url, method='POST', body=None, headers={'content-type': 'application/x-www-form-urlencoded'})[0]
+        result = h.request(uri=url, method='POST', body=None, headers={
+                           'content-type': 'application/x-www-form-urlencoded'})[0]
 
         if result['status'] == '200':
             del login_session['access_token']
@@ -161,7 +156,8 @@ def logout():
             del login_session['picture']
             del login_session['user_id']
             del login_session['category']
-            response = make_response(json.dumps('Successfully disconnected.'), 200)
+            response = make_response(json.dumps(
+                'Successfully disconnected.'), 200)
             response.headers['Content-Type'] = 'application/json'
             flash("Successfully signed out from google account", "success")
             return redirect('/home')
@@ -178,23 +174,23 @@ def logout():
         flash("Successfully signed out", "success")
         return redirect('/home')
 
-#Signup page
+# Signup page
 @app.route('/signup')
 def signup_page():
     return redirect(url_for('register_user'))
-#Login Page
+# Login Page
 @app.route('/login', methods=['GET', 'POST'])
 def login_user():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
 
-        print('email: %s' %email)
-        print('password: %s' %password)
+        print('email: %s' % email)
+        print('password: %s' % password)
 
         user = session.query(Users).filter_by(email=email).first()
         if not user:
-           
+
             print('User or Password is incorrect!')
             flash('User or Password is incorrect!.', "danger")
             return redirect('/login')
@@ -208,27 +204,28 @@ def login_user():
             return redirect('/home')
     else:
         return render_template(
-        'signin.html',
-        title='Login',
-        year=datetime.now().year,
-        message='The restaurant catalog'
-    )
+            'signin.html',
+            title='Login',
+            year=datetime.now().year,
+            message='The restaurant catalog'
+        )
 
-#Register User
-@app.route('/register-user', methods=["GET","POST"])
+# Register User
+@app.route('/register-user', methods=["GET", "POST"])
 def register_user():
-      if request.method == 'POST':
-        name =request.form['name']
+    if request.method == 'POST':
+        name = request.form['name']
         email = request.form['email']
         password = request.form['password']
 
-        print('name: %s' %name)
-        print('email: %s' %email)
-        print('password: %s' %password)
+        print('name: %s' % name)
+        print('email: %s' % email)
+        print('password: %s' % password)
 
         user = session.query(Users).filter_by(email=email).first()
         if not user:
-            new_user = Users(name=name, email=email, password=password, category="2")
+            new_user = Users(name=name, email=email,
+                             password=password, category="2")
             session.add(new_user)
             session.commit()
             print('User is registered successfully!')
@@ -236,10 +233,10 @@ def register_user():
         else:
             print('User Exists')
             flash('User already registered!', "success")
-        
+
         return redirect('/login')
-      else:
-        return render_template('signup.html')  
+    else:
+        return render_template('signup.html')
 
 # New restaurant registration
 @app.route('/restaurant/new/', methods=['GET', 'POST'])
@@ -270,7 +267,7 @@ def editRestaurant(restaurant_id):
     editRestaurant = session.query(Restaurant).filter_by(
         id=restaurant_id).one()
     if editRestaurant.user_id != login_session['user_id']:
-        flash('Sorry, you are not allowed to edit', "danger")
+        flash('You do not have permission to edit it', "danger")
         return redirect(url_for('home'))
     if request.method == 'POST':
         if request.form['restaurant_name']:
@@ -290,7 +287,7 @@ def deleteRestaurant(restaurant_id):
     delRestaurant = session.query(Restaurant).filter_by(
         id=restaurant_id).one()
     if delRestaurant.user_id != login_session['user_id']:
-        flash('Sorry, you are not allowed to Delete', "danger")
+        flash('You do not have permission to delete it', "danger")
         return redirect(url_for('home'))
     if request.method == 'POST':
         session.delete(delRestaurant)
@@ -304,10 +301,12 @@ def deleteRestaurant(restaurant_id):
 # JSON Restaurants View
 @app.route('/json')
 def restaurantJSON():
-    
+
     # return jsonify(restaurants=[r.serialize for r in restaurants])
-    restaurants = session.query(Restaurant).options(joinedload(Restaurant.items)).all()
+    restaurants = session.query(Restaurant).options(
+        joinedload(Restaurant.items)).all()
     return jsonify(restaurants=[dict(c.serialize, items=[i.serialize for i in c.items]) for c in restaurants])
+
 
 @app.route('/')
 @app.route('/home')
@@ -376,7 +375,8 @@ def add_menu(restaurant_id):
                            restaurant_id=restaurant_id,
                            user_id=user_id)
         session.add(newMenu)
-        flash('New Menu %s Item Successfully Added' %(newMenu.name), "success")
+        flash('New Menu %s Item Successfully Added' %
+              (newMenu.name), "success")
         session.commit()
         return redirect(url_for('list_all_menu', restaurant_id=restaurant_id))
     else:

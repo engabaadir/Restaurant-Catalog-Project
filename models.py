@@ -16,6 +16,7 @@ class Users(Base):
     password = Column(String(20))
     category = Column(String(10))
 
+
 class Restaurant(Base):
     __tablename__ = 'restaurant'
 
@@ -31,6 +32,7 @@ class Restaurant(Base):
             'name': self.name,
             'id': self.id,
         }
+
 
 class MenuItem(Base):
     __tablename__ = 'menu_item'
