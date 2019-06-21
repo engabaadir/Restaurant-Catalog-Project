@@ -1,22 +1,18 @@
-"""
-Routes and views for the flask application.
-"""
-from models import Base, Restaurant, MenuItem, Users
-from flask import Flask, render_template, request, redirect, jsonify, url_for, flash
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship, joinedload
-from sqlalchemy import create_engine
-from flask import session as login_session
-from oauth2client.client import flow_from_clientsecrets
-from oauth2client.client import FlowExchangeError
-import httplib2
-import os
-import json
-from flask import make_response
-import requests
-
 from datetime import datetime
-
+import requests
+from flask import make_response
+import json
+import os
+import httplib2
+from oauth2client.client import FlowExchangeError
+from oauth2client.client import flow_from_clientsecrets
+from flask import session as login_session
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, relationship, joinedload
+from sqlalchemy.ext.declarative import declarative_base
+from models import Base, Restaurant, MenuItem, Users
+from flask import Flask, render_template, request
+from flask import redirect, jsonify, url_for, flash
 
 engine = create_engine('sqlite:///restaurant.db?check_same_thread=False')
 Base.metadata.bind = engine
@@ -25,9 +21,16 @@ session = DBSession()
 
 app = Flask(__name__)
 
+
 # Login using google provider
 @app.route('/oauth/<provider>', methods=['POST'])
 def login(provider):
+    """ Implementation of google authentication & authorization
+    Args:
+      provider: takes the name of the provider like google
+    Returns:
+       http response from google
+    """
     # STEP 1 - Parse the auth code
 
     client_secret = (os.path.join(os.path.dirname(os.path.abspath(
@@ -50,8 +53,8 @@ def login(provider):
 
         # Check that the access token is valid.
         access_token = credentials.access_token
-        url = (
-            'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s' % access_token)
+        url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s'
+               % access_token)
         h = httplib2.Http()
         result = json.loads(h.request(url, 'GET')[1])
         # If there was an error in the access token info, abort.
@@ -112,10 +115,11 @@ def login(provider):
         user = session.query(Users).filter_by(
             email=login_session['email']).first()
         if not user:
-            new_user = Users(
-                name=login_session['name'], picture=login_session['picture'], email=login_session['email'], category="2")
+            user = Users(
+                name=login_session['name'], picture=login_session['picture'],
+                email=login_session['email'], category="2")
 
-            session.add(new_user)
+            session.add(user)
             session.commit()
             print('User is registered successfully!')
         else:
@@ -146,8 +150,9 @@ def logout():
         url = ('https://accounts.google.com/o/oauth2/revoke?token=%s' %
                access_token)
         h = httplib2.Http()
-        result = h.request(uri=url, method='POST', body=None, headers={
-                           'content-type': 'application/x-www-form-urlencoded'})[0]
+        result = h.request(uri=url, method='POST', body=None,
+                           headers={'content-type':
+                                    'application/x-www-form-urlencoded'})[0]
 
         if result['status'] == '200':
             del login_session['access_token']
@@ -174,10 +179,13 @@ def logout():
         flash("Successfully signed out", "success")
         return redirect('/home')
 
+
 # Signup page
 @app.route('/signup')
 def signup_page():
     return redirect(url_for('register_user'))
+
+
 # Login Page
 @app.route('/login', methods=['GET', 'POST'])
 def login_user():
@@ -210,6 +218,7 @@ def login_user():
             message='The restaurant catalog'
         )
 
+
 # Register User
 @app.route('/register-user', methods=["GET", "POST"])
 def register_user():
@@ -238,6 +247,7 @@ def register_user():
     else:
         return render_template('signup.html')
 
+
 # New restaurant registration
 @app.route('/restaurant/new/', methods=['GET', 'POST'])
 def register_restaurant():
@@ -249,7 +259,8 @@ def register_restaurant():
 
     if request.method == 'POST':
         restaurant = Restaurant(
-            name=request.form['restaurant-name'], user_id=login_session['user_id'])
+            name=request.form['restaurant-name'],
+            user_id=login_session['user_id'])
         session.add(restaurant)
         flash('Restaurant is successfully registered.', "success")
         print('Restaurant is succesfully Added')
@@ -259,6 +270,7 @@ def register_restaurant():
         return render_template('new_restaurant.html')
 
 
+# Edit Restaurant
 @app.route('/restaurant/<int:restaurant_id>/edit', methods=['GET', 'POST'])
 def editRestaurant(restaurant_id):
     # check if username is logged in
@@ -277,7 +289,10 @@ def editRestaurant(restaurant_id):
             flash('Successfully Edited', 'success')
             return redirect(url_for('list_all_restaurants'))
     else:
-        return render_template('edit_restaurant.html', restaurant_id=restaurant_id, editRestaurant=editRestaurant)
+        return render_template('edit_restaurant.html',
+                               restaurant_id=restaurant_id,
+                               editRestaurant=editRestaurant)
+
 
 # Delete Restaurant
 @app.route('/restaurant/<int:restaurant_id>/delete', methods=['GET', 'POST'])
@@ -298,36 +313,84 @@ def deleteRestaurant(restaurant_id):
         return render_template('delete_restaurant.html',
                                delRestaurant=delRestaurant)
 
+
 # JSON Restaurants View
 @app.route('/json')
-def restaurantJSON():
-
-    # return jsonify(restaurants=[r.serialize for r in restaurants])
+def AllRestaurantMenuJSON():
     restaurants = session.query(Restaurant).options(
         joinedload(Restaurant.items)).all()
-    return jsonify(restaurants=[dict(c.serialize, items=[i.serialize for i in c.items]) for c in restaurants])
+    return jsonify(restaurants=[dict(c.serialize,
+                                     items=[i.serialize for i in c.items])
+                                for c in restaurants])
 
 
+# JSON APIs to view a single Restaurant's Menu Information
+@app.route('/restaurant/<int:restaurant_id>/menu/JSON')
+def restaurantMenuJSON(restaurant_id):
+    """ JSON APIs to view a single Restaurant's Menu Information """
+    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+    items = session.query(MenuItem).filter_by(
+        restaurant_id=restaurant_id).all()
+    return jsonify(MenuItems=[i.serialize for i in items])
+
+
+# JSON APIs to view a menu Information
+@app.route('/restaurant/<int:restaurant_id>/menu/<int:menu_id>/JSON')
+def menuItemJSON(restaurant_id, menu_id):
+    """ JSON APIs to view a menu Information
+    Args:
+     restaurant_Id: the unique integer id for the restaurant
+     menu_id: the unique integer id for the menu item
+
+    Returns:
+     Serialized json menu item
+    """
+    Menu_Item = session.query(MenuItem).filter_by(id=menu_id).one()
+    return jsonify(Menu_Item=Menu_Item.serialize)
+
+
+# JSON APIs to view restaurant Information
+@app.route('/restaurant/JSON')
+def restaurantsJSON():
+    """ JSON APIs to view a menu Information
+    Args:
+     restaurant_Id: the unique integer id for the restaurant
+     menu_id: the unique integer id for the menu item
+
+    Returns:
+     Serialized json menu item
+    """
+    restaurants = session.query(Restaurant).all()
+    return jsonify(restaurants=[r.serialize for r in restaurants])
+
+
+# Redirect to restaurants page
 @app.route('/')
 @app.route('/home')
 def home():
     return redirect(url_for('list_all_restaurants'))
+
 
 # List all restaurants
 @app.route('/restaurants/')
 def list_all_restaurants():
     restaurants = session.query(Restaurant).all()
     menus = session.query(MenuItem).all()
-    return render_template('restaurants.html', restaurants=restaurants, menus=menus)
+    return render_template('restaurants.html',
+                           restaurants=restaurants, menus=menus)
+
 
 # List all menus
 @app.route('/restaurant/<int:restaurant_id>/')
 @app.route('/restaurant/<int:restaurant_id>/menu/')
 def list_all_menu(restaurant_id):
-    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+    restaurant = session.query(Restaurant).filter_by(
+        id=restaurant_id).one()
     items = session.query(MenuItem).filter_by(
         restaurant_id=restaurant_id).all()
-    return render_template('menus.html', items=items, restaurant=restaurant)
+    return render_template('menus.html', items=items,
+                           restaurant=restaurant)
+
 
 # view restaurant menu items
 @app.route('/restaurant/<string:restaurant_name>/menu/')
@@ -342,7 +405,10 @@ def view_restaurant(restaurant_name):
     count = session.query(MenuItem).filter_by(
         restaurant_id=restaurant.id).count()
 
-    return render_template('view_restaurant.html', items=items, restaurants=restaurants, res_name=restaurant_name, countitem=count)
+    return render_template('view_restaurant.html', items=items,
+                           restaurants=restaurants,
+                           res_name=restaurant_name, countitem=count)
+
 
 # View Menu item
 @app.route('/restaurant/<string:restaurant_name>/<string:menu_name>/')
@@ -353,17 +419,19 @@ def view_menu(restaurant_name, menu_name):
         name=menu_name).one()
     return render_template('view_menu.html', item=item, restaurant=restaurant)
 
+
 # Create a new menu item
-@app.route('/restaurant/<int:restaurant_id>/menu/new/', methods=['GET', 'POST'])
+@app.route('/restaurant/<int:restaurant_id>/menu/new/',
+           methods=['GET', 'POST'])
 def add_menu(restaurant_id):
     if 'name' not in login_session:
         return redirect('/login')
     user_id = login_session['user_id']
-    #allrestaurant = session.query(Restaurant).all()
     if request.method == 'POST':
         if restaurant_id == "":
             flash('Please select a restaurant name.', "danger")
-            return render_template('new_menu.html', restaurant_id=restaurant_id)
+            return render_template('new_menu.html',
+                                   restaurant_id=restaurant_id)
         restaurant = session.query(
             Restaurant).filter_by(id=restaurant_id).one()
         if restaurant.user_id != login_session['user_id']:
@@ -384,7 +452,8 @@ def add_menu(restaurant_id):
 
 
 # Edit menu
-@app.route('/restaurant/<int:restaurant_id>/menu/<int:menu_id>/edit', methods=['GET', 'POST'])
+@app.route('/restaurant/<int:restaurant_id>/menu/<int:menu_id>/edit',
+           methods=['GET', 'POST'])
 def edit_menu(restaurant_id, menu_id):
 
     if 'name' not in login_session:
@@ -409,10 +478,13 @@ def edit_menu(restaurant_id, menu_id):
         flash('Menu Item Successfully Edited', 'success')
         return redirect(url_for('list_all_menu', restaurant_id=restaurant_id))
     else:
-        return render_template('edit_menu.html', restaurant_id=restaurant_id, menu_id=menu_id, menuItem=editedItem)
+        return render_template('edit_menu.html', restaurant_id=restaurant_id,
+                               menu_id=menu_id, menuItem=editedItem)
+
 
 # Delete Menu
-@app.route('/restaurant/<int:restaurant_id>/menu/<int:menu_id>/delete', methods=['GET', 'POST'])
+@app.route('/restaurant/<int:restaurant_id>/menu/<int:menu_id>/delete',
+           methods=['GET', 'POST'])
 def delete_menu(restaurant_id, menu_id):
 
     if 'name' not in login_session:
